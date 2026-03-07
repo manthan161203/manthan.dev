@@ -1,16 +1,72 @@
-# React + Vite
+# Manthan Portfolio (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI/ML + Python backend portfolio with:
+- React + Tailwind + Framer Motion UI
+- Data-driven sections from `src/portfolio.json`
+- Gemini recruiter copilot using a **server-side proxy route** (`/api/gemini`)
+- Contact form email delivery via **Nodemailer** (`/api/contact`)
 
-Currently, two official plugins are available:
+## Run Locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install dependencies:
+```bash
+npm install
+```
 
-## React Compiler
+2. Create env file:
+```bash
+cp .env.example .env
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. Add server-side keys to `.env`:
+```env
+GEMINI_API_KEY=your_real_key_here
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+CONTACT_TO=your_email@gmail.com
+CONTACT_FROM=your_email@gmail.com
+CONTACT_AUTO_REPLY_SUBJECT=Thanks for contacting Manthan Patel
+CONTACT_AUTO_REPLY_NAME=Manthan Patel
+```
 
-## Expanding the ESLint configuration
+4. Start dev server:
+```bash
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Key Security
+
+- Do **not** put Gemini keys in client env vars like `VITE_*`.
+- The frontend now calls `/api/gemini`; key stays server-side.
+- The contact form calls `/api/contact`; SMTP credentials stay server-side.
+- `.env` is ignored by git. Keep `.env.example` safe as template only.
+
+## Nodemailer Notes
+
+- For Gmail, use an **App Password** (not your main account password).
+- `CONTACT_TO` controls where inquiries are delivered.
+- `CONTACT_FROM` is the sender shown to recipient mailbox (must match allowed sender on many SMTP providers).
+- Visitors also receive an automatic confirmation email.
+- `CONTACT_AUTO_REPLY_SUBJECT` and `CONTACT_AUTO_REPLY_NAME` customize that confirmation mail.
+
+## Update Portfolio Content
+
+Edit:
+- `src/portfolio.json` for personal info, experience, projects, skills
+- `src/components/*` if you want layout/content structure changes
+
+## Notes for Deployment
+
+- A production API handler is included at `api/gemini.js` (works for serverless platforms that support this pattern).
+- A production API handler is also included at `api/contact.js`.
+- Ensure `GEMINI_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_AUTO_REPLY_SUBJECT`, `CONTACT_AUTO_REPLY_NAME` are configured in your hosting environment.

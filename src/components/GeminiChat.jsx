@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FiSend, FiX } from 'react-icons/fi';
+import { FiRotateCcw, FiSend, FiX } from 'react-icons/fi';
 import { FaBrain } from 'react-icons/fa';
 import { GEMINI_CONTEXT } from '../data';
 
@@ -16,15 +16,20 @@ const MODELS = [
     { value: 'gemini-2.0-flash', label: 'gemini-2.0-flash' },
 ];
 
+const DEFAULT_MESSAGES = [
+    {
+        role: 'assistant',
+        text: "Hi. I am Manthan's AI assistant. Ask me about his projects, experience, and skills.",
+    },
+];
+
+const MODEL_STORAGE_KEY = 'portfolio_gemini_model';
+const MAX_INPUT_CHARS = 500;
+
 export default function GeminiChat() {
     const [open, setOpen] = useState(false);
     const [model, setModel] = useState(MODELS[0].value);
-    const [messages, setMessages] = useState([
-        {
-            role: 'assistant',
-            text: "Hi. I am Manthan's AI assistant. Ask me about his projects, experience, and skills.",
-        },
-    ]);
+    const [messages, setMessages] = useState(DEFAULT_MESSAGES);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
@@ -42,9 +47,39 @@ export default function GeminiChat() {
         }
     }, [open]);
 
+    useEffect(() => {
+        try {
+            const stored = window.localStorage.getItem(MODEL_STORAGE_KEY);
+            if (stored && MODELS.some((option) => option.value === stored)) {
+                setModel(stored);
+            }
+        } catch {
+            // no-op in restricted browser modes
+        }
+    }, []);
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(MODEL_STORAGE_KEY, model);
+        } catch {
+            // no-op in restricted browser modes
+        }
+    }, [model]);
+
     const sendMessage = async (draft) => {
         const msg = (draft || input).trim();
         if (!msg || loading) return;
+        if (msg.length > MAX_INPUT_CHARS) {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: 'assistant',
+                    text: `Message too long. Keep it under ${MAX_INPUT_CHARS} characters.`,
+                    isError: true,
+                },
+            ]);
+            return;
+        }
 
         setInput('');
         const history = [...messages, { role: 'user', text: msg }];
@@ -117,6 +152,11 @@ export default function GeminiChat() {
         }
     };
 
+    const resetConversation = () => {
+        setMessages(DEFAULT_MESSAGES);
+        setInput('');
+    };
+
     const onInputKeyDown = (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
@@ -133,11 +173,11 @@ export default function GeminiChat() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 16 }}
                         transition={{ duration: 0.2 }}
-                        className="pointer-events-auto w-[380px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[82vh] rounded-3xl border border-white/15 bg-[#101526]/95 shadow-2xl shadow-[#0fbc9a1f] overflow-hidden flex flex-col backdrop-blur-xl"
+                        className="pointer-events-auto w-[380px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[82vh] rounded-3xl border border-white/15 bg-[#0b1120]/95 shadow-2xl shadow-[#64f5d226] overflow-hidden flex flex-col backdrop-blur-xl"
                     >
                         <header className="p-4 border-b border-white/10 bg-white/[0.02] flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                                <span className="w-10 h-10 rounded-xl bg-[#0fbc9a1f] border border-[#0fbc9a55] text-[#64f5d2] flex items-center justify-center">
+                                <span className="w-10 h-10 rounded-xl bg-[#64f5d21a] border border-[#64f5d255] text-[#64f5d2] flex items-center justify-center">
                                     <FaBrain />
                                 </span>
                                 <div>
@@ -145,21 +185,31 @@ export default function GeminiChat() {
                                     <p className="text-xs text-slate-400">Server-side Gemini route</p>
                                 </div>
                             </div>
-                            <select
-                                className="text-xs bg-black/30 border border-white/15 rounded-lg px-2 py-1 text-slate-200 outline-none"
-                                value={model}
-                                onChange={(event) => setModel(event.target.value)}
-                                aria-label="Select Gemini model"
-                            >
-                                {MODELS.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={resetConversation}
+                                    className="w-8 h-8 rounded-lg border border-white/15 bg-black/20 text-slate-300 hover:text-[#f7d47c] hover:border-[#f7d47c66] transition-colors flex items-center justify-center"
+                                    aria-label="Reset chat"
+                                >
+                                    <FiRotateCcw size={14} />
+                                </button>
+                                <select
+                                    className="text-xs bg-black/30 border border-white/15 rounded-lg px-2 py-1 text-slate-200 outline-none"
+                                    value={model}
+                                    onChange={(event) => setModel(event.target.value)}
+                                    aria-label="Select Gemini model"
+                                >
+                                    {MODELS.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </header>
 
-                        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                        <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3" aria-live="polite">
                             {messages.map((message, index) => (
                                 <motion.div
                                     key={index}
@@ -169,7 +219,7 @@ export default function GeminiChat() {
                                         message.role === 'user'
                                             ? 'self-end bg-[#f7d47c] text-[#1f1a10] rounded-br-sm'
                                             : message.isError
-                                                ? 'self-start bg-[#ff6b6b1a] text-[#ffc7c7] border border-[#ff6b6b4d] rounded-bl-sm'
+                                                ? 'self-start bg-[#f7d47c1a] text-[#fce3a4] border border-[#f7d47c4d] rounded-bl-sm'
                                                 : 'self-start bg-white/10 text-slate-200 border border-white/10 rounded-bl-sm'
                                     }`}
                                 >
@@ -207,7 +257,7 @@ export default function GeminiChat() {
                                 ref={inputRef}
                                 rows={1}
                                 value={input}
-                                onChange={(event) => setInput(event.target.value)}
+                                onChange={(event) => setInput(event.target.value.slice(0, MAX_INPUT_CHARS))}
                                 onKeyDown={onInputKeyDown}
                                 placeholder="Ask about projects, stacks, or interview fit..."
                                 disabled={loading}
@@ -226,6 +276,9 @@ export default function GeminiChat() {
                                     <FiSend size={14} />
                                 )}
                             </button>
+                        </div>
+                        <div className="px-4 pb-3 text-[11px] text-slate-500 text-right">
+                            {input.length}/{MAX_INPUT_CHARS}
                         </div>
                     </motion.section>
                 )}

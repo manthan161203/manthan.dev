@@ -30,7 +30,7 @@ export default function Navbar() {
                     : 'py-5 bg-transparent'
             }`}
         >
-            <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+            <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between" aria-label="Primary navigation">
                 <a
                     href="#home"
                     className="text-xl md:text-2xl font-bold font-title tracking-tight text-[#f8f6f1] hover:text-[#f7d47c] transition-colors"

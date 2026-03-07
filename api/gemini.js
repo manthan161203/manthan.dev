@@ -1,3 +1,30 @@
+const ALLOWED_MODELS = new Set(['gemini-2.5-flash-lite', 'gemini-2.0-flash']);
+const MAX_PART_CHARS = 6000;
+const MAX_TOTAL_CHARS = 30000;
+
+function validateContents(contents) {
+  if (!Array.isArray(contents) || contents.length === 0) {
+    return 'Invalid body: `contents` is required.';
+  }
+
+  let totalChars = 0;
+  for (const item of contents) {
+    const parts = Array.isArray(item?.parts) ? item.parts : [];
+    for (const part of parts) {
+      const text = typeof part?.text === 'string' ? part.text : '';
+      totalChars += text.length;
+      if (text.length > MAX_PART_CHARS) {
+        return `Each message part must be <= ${MAX_PART_CHARS} characters.`;
+      }
+      if (totalChars > MAX_TOTAL_CHARS) {
+        return `Total request text must be <= ${MAX_TOTAL_CHARS} characters.`;
+      }
+    }
+  }
+
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -15,8 +42,14 @@ export default async function handler(req, res) {
   try {
     const { model = 'gemini-2.5-flash-lite', contents } = req.body || {};
 
-    if (!Array.isArray(contents) || contents.length === 0) {
-      res.status(400).json({ error: 'Invalid body: `contents` is required.' });
+    if (!ALLOWED_MODELS.has(model)) {
+      res.status(400).json({ error: 'Unsupported model requested.' });
+      return;
+    }
+
+    const validationError = validateContents(contents);
+    if (validationError) {
+      res.status(400).json({ error: validationError });
       return;
     }
 

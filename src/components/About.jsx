@@ -3,7 +3,7 @@ import { portfolioDataJSON } from '../data';
 
 export default function About() {
     const { stats } = portfolioDataJSON;
-    const { bio } = portfolioDataJSON.personalInfo;
+    const { bio, name } = portfolioDataJSON.personalInfo;
 
     return (
         <section id="about" className="py-24 relative border-t border-white/10">
@@ -18,12 +18,15 @@ export default function About() {
                     className="max-w-3xl mx-auto"
                 >
                     <div className="flex flex-col md:flex-row gap-12 items-start">
-                        {/* Profile Image Column (Optional minimal representation) */}
+                        {/* Profile Image Column */}
                         <div className="w-full md:w-1/3 flex flex-col items-center md:items-start shrink-0">
                             <div className="w-48 h-48 rounded-2xl border border-white/15 flex items-center justify-center mb-6 overflow-hidden minimal-card p-1">
-                                <div className="w-full h-full rounded-xl bg-[#121a2c] border border-white/10 flex items-center justify-center text-4xl text-[#64f5d2] font-mono">
-                                    MP
-                                </div>
+                                <img
+                                    src="/profile_pic.jpg"
+                                    alt={`${name} profile`}
+                                    className="w-full h-full rounded-xl object-cover object-center border border-white/10"
+                                    loading="lazy"
+                                />
                             </div>
 
                             {/* Quick Stats */}

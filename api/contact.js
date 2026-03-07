@@ -1,0 +1,205 @@
+import nodemailer from 'nodemailer';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function escapeHtml(value) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function sanitizeHeaderText(value) {
+  return (value || '').replace(/[\r\n]+/g, ' ').trim();
+}
+
+function validateFormPayload(body) {
+  const name = (body?.name || '').trim();
+  const email = (body?.email || '').trim();
+  const subject = (body?.subject || '').trim();
+  const message = (body?.message || '').trim();
+
+  if (!name || name.length < 2 || name.length > 80) {
+    return { error: 'Name must be between 2 and 80 characters.' };
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    return { error: 'A valid email address is required.' };
+  }
+  if (subject.length > 140) {
+    return { error: 'Subject must be 140 characters or less.' };
+  }
+  if (!message || message.length < 10 || message.length > 4000) {
+    return { error: 'Message must be between 10 and 4000 characters.' };
+  }
+
+  return { name, email, subject, message };
+}
+
+function getTransportConfig() {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 465);
+  const secure = String(process.env.SMTP_SECURE || 'true') === 'true';
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass || !Number.isFinite(port)) {
+    return null;
+  }
+
+  return {
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+  };
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const payload = validateFormPayload(req.body || {});
+  if ('error' in payload) {
+    res.status(400).json({ error: payload.error });
+    return;
+  }
+
+  const transportConfig = getTransportConfig();
+  if (!transportConfig) {
+    res.status(500).json({
+      error:
+        'SMTP configuration is missing. Set SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS.',
+    });
+    return;
+  }
+
+  const to = process.env.CONTACT_TO || process.env.SMTP_USER;
+  const from = process.env.CONTACT_FROM || process.env.SMTP_USER;
+  const autoReplySubject =
+    process.env.CONTACT_AUTO_REPLY_SUBJECT ||
+    'Thanks for contacting Manthan Patel';
+  const autoReplyName =
+    process.env.CONTACT_AUTO_REPLY_NAME || 'Manthan Patel';
+
+  try {
+    const transporter = nodemailer.createTransport(transportConfig);
+    const safeName = escapeHtml(payload.name);
+    const safeEmail = escapeHtml(payload.email);
+    const safeSubject = escapeHtml(payload.subject || 'New inquiry');
+    const safeMessage = escapeHtml(payload.message);
+    const headerName = sanitizeHeaderText(payload.name) || 'Portfolio Visitor';
+    const headerSubject = sanitizeHeaderText(payload.subject) || 'New inquiry';
+    const receivedAt = new Date().toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'Asia/Kolkata',
+    });
+    const safeReceivedAt = escapeHtml(receivedAt);
+    const autoReplySignature = escapeHtml(autoReplyName);
+
+    await transporter.sendMail({
+      from: `"${headerName}" <${payload.email}>`,
+      sender: from,
+      to,
+      replyTo: payload.email,
+      subject: `[Portfolio Contact] [From ${payload.email}] ${headerSubject}`,
+      text: [
+        `Received At: ${receivedAt} (IST)`,
+        `Name: ${payload.name}`,
+        `Email: ${payload.email}`,
+        `Subject: ${payload.subject || 'New inquiry'}`,
+        '',
+        'Message:',
+        payload.message,
+      ].join('\n'),
+      html: `
+        <div style="font-family: Manrope, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#050813; padding:24px;">
+          <div style="max-width:640px; margin:0 auto; background:#0b1120; border:1px solid #64f5d233; border-radius:14px; overflow:hidden;">
+            <div style="padding:16px 22px; background:linear-gradient(120deg,#0b1120 0%,#101a30 100%); border-bottom:1px solid #64f5d233;">
+              <div style="height:3px; width:100%; background:linear-gradient(90deg,#64f5d2 0%,#f7d47c 100%); border-radius:999px; margin-bottom:12px;"></div>
+              <h2 style="margin:0; font-size:20px; color:#f8f6f1;">New Portfolio Inquiry</h2>
+              <p style="margin:6px 0 0; font-size:13px; color:#aeb9cf;">Received ${safeReceivedAt} (IST)</p>
+            </div>
+            <div style="padding:20px 22px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse; font-size:14px;">
+                <tr>
+                  <td style="padding:8px 0; color:#aeb9cf; width:110px;">From</td>
+                  <td style="padding:8px 0; color:#f8f6f1; font-weight:600;">${safeName} &lt;${safeEmail}&gt;</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0; color:#aeb9cf;">Subject</td>
+                  <td style="padding:8px 0; color:#f8f6f1; font-weight:600;">${safeSubject}</td>
+                </tr>
+              </table>
+              <div style="margin-top:16px; padding:14px; border:1px solid #64f5d24d; background:#081022; border-radius:10px;">
+                <p style="margin:0 0 8px; font-weight:700; color:#64f5d2;">Message</p>
+                <p style="margin:0; color:#f8f6f1; white-space:pre-wrap;">${safeMessage}</p>
+              </div>
+              <div style="margin-top:14px; padding:10px 12px; border-radius:8px; background:#f7d47c1a; border:1px solid #f7d47c66; color:#f7d47c; font-size:12px;">
+                Reply directly to this email to contact ${safeName}.
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+    });
+
+    let autoReplySent = false;
+    try {
+      await transporter.sendMail({
+        from,
+        to: payload.email,
+        subject: autoReplySubject,
+        text: [
+          `Hi ${payload.name},`,
+          '',
+          'Thank you for reaching out through my portfolio website.',
+          `I have received your message about "${payload.subject || 'your inquiry'}".`,
+          'I will get back to you soon at this email.',
+          '',
+          `Regards,`,
+          autoReplyName,
+        ].join('\n'),
+        html: `
+          <div style="font-family: Manrope, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#050813; padding:24px;">
+            <div style="max-width:620px; margin:0 auto; background:#0b1120; border:1px solid #64f5d233; border-radius:14px; overflow:hidden;">
+              <div style="padding:16px 22px; background:linear-gradient(120deg,#0b1120 0%,#101a30 100%); border-bottom:1px solid #64f5d233;">
+                <div style="height:3px; width:100%; background:linear-gradient(90deg,#64f5d2 0%,#f7d47c 100%); border-radius:999px; margin-bottom:12px;"></div>
+                <h2 style="margin:0; font-size:20px; color:#f8f6f1;">Thanks for your message</h2>
+                <p style="margin:6px 0 0; font-size:13px; color:#aeb9cf;">Manthan Patel Portfolio</p>
+              </div>
+              <div style="padding:20px 22px; color:#f8f6f1; line-height:1.65;">
+                <p style="margin:0 0 12px;">Hi ${safeName},</p>
+                <p style="margin:0 0 12px;">Thank you for reaching out through my portfolio website.</p>
+                <p style="margin:0 0 16px;">I have received your message about "<strong>${safeSubject}</strong>". I will get back to you soon.</p>
+                <div style="padding:12px 14px; border:1px solid #64f5d24d; border-radius:10px; background:#081022;">
+                  <p style="margin:0 0 6px; font-size:13px; color:#64f5d2;">Your submitted message</p>
+                  <p style="margin:0; white-space:pre-wrap;">${safeMessage}</p>
+                </div>
+                <p style="margin:18px 0 0; color:#f8f6f1;">Regards,<br/><span style="color:#f7d47c;">${autoReplySignature}</span></p>
+                <p style="margin:14px 0 0; font-size:12px; color:#aeb9cf;">This is an automated confirmation. Please do not reply to this email.</p>
+              </div>
+            </div>
+          </div>
+        `,
+      });
+      autoReplySent = true;
+    } catch {
+      autoReplySent = false;
+    }
+
+    res.status(200).json({
+      ok: true,
+      message: 'Message sent successfully.',
+      autoReplySent,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to send message',
+    });
+  }
+}
