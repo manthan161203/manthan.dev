@@ -1,0 +1,235 @@
+{
+  "personalInfo": {
+    "name": "Manthan Patel",
+    "shortName": "Manthan",
+    "title": "AI/ML Engineer | Python Backend Developer",
+    "email": "manthanlp3204@gmail.com",
+    "phone": "+91-7383161203",
+    "location": "Gujarat, India",
+    "university": "Dharmsinh Desai University",
+    "degree": "B.Tech in Computer Engineering",
+    "linkedin": "https://www.linkedin.com/in/manthankumarpatel",
+    "github": "https://github.com/manthankumarpatel",
+    "bio": "AI/ML and backend developer with experience in building LLM applications, RAG pipelines, OCR systems, and AI automation tools. Currently working at DRC Systems India Limited as Associate Software Developer. Skilled in Python, FastAPI, LangChain, Vector Databases, Docker, and AI-powered backend systems.",
+    "tagline": "Building intelligent systems with LLMs, FastAPI, and scalable AI solutions"
+  },
+  "typewriterPhrases": [
+    "AI/ML Engineer",
+    "Python Backend Developer"
+  ],
+  "stats": [
+    {
+      "value": "10+",
+      "label": "Projects Built"
+    },
+    {
+      "value": "2+",
+      "label": "Years Experience"
+    }
+  ],
+  "experiences": [
+    {
+      "company": "DRC Systems India Limited",
+      "role": "Associate Software Developer (Python)",
+      "duration": "July 2025 – Present",
+      "location": "Gandhinagar",
+      "type": "Full-time",
+      "highlights": [
+        "Integrated LLMs, RAG workflows, and automation modules to enhance product AI capabilities.",
+        "Implemented vector-embedding–based course recommendation system for NPCI.",
+        "Developed multilingual APMC and weather chatbots for regional language support.",
+        "Built an AI-powered quiz generator supporting multiple question formats.",
+        "Created YouTube-based chatbot using Whisper and yt_dlp for transcript-driven Q&A.",
+        "Developed GitHubRepoAnalysis using Gemini Flash 2.5 Lite to evaluate HTML/CSS/JS code accuracy.",
+        "Built ChatWithDBAI for natural-language querying of student and course databases.",
+        "Developed MultiSoundMonitorDet for multi-sound detection and multi-monitor testing in NPCI workflows.",
+        "Deployed scalable backend systems using FastAPI, Docker, NGINX, and MySQL."
+      ]
+    },
+    {
+      "company": "DRC Systems India Limited",
+      "role": "Intern (Python)",
+      "duration": "January 2025 – June 2025",
+      "location": "Gandhinagar",
+      "type": "Internship",
+      "highlights": [
+        "Built Smart KYC OCR automation system with accurate document data extraction.",
+        "Developed LeetAgent, an AI tool generating structured GitHub-ready LeetCode documentation.",
+        "Learned and applied ML, NLP, data gathering, and data preprocessing techniques.",
+        "Contributed to backend modules, REST API integrations, and automation scripts."
+      ]
+    },
+    {
+      "company": "Tntra",
+      "role": "AI/ML Intern",
+      "duration": "May 2024 – June 2024",
+      "location": "Remote/Vadodara",
+      "type": "Internship",
+      "highlights": [
+        "Performed web scraping using Scrapy, BeautifulSoup, and requests for structured dataset creation.",
+        "Built automated scraping pipelines for large-scale data gathering and preprocessing.",
+        "Assisted in ML model development through dataset cleaning, labeling, and feature extraction."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "title": "SmartKYC - AI-Based KYC Automation System",
+      "subtitle": "OCR-based automated KYC system",
+      "description": "Extracting, validating, and structuring identity document data. Developed preprocessing, OCR extraction, and structured JSON output for seamless backend integration.",
+      "tags": [
+        "Python",
+        "Tesseract OCR",
+        "OpenCV",
+        "FastAPI"
+      ],
+      "github": "https://github.com/manthankumarpatel",
+      "featured": true
+    },
+    {
+      "title": "EazyHealthCare - Doctor Appointment System",
+      "subtitle": "MERN Stack full-stack healthcare platform",
+      "description": "Platform for doctor appointment booking, patient management, and secure communication. Implemented authentication, appointment scheduling, dashboards, and API communication.",
+      "tags": [
+        "MongoDB",
+        "Express.js",
+        "React.js",
+        "Node.js"
+      ],
+      "github": "https://github.com/manthankumarpatel",
+      "featured": true
+    },
+    {
+      "title": "AI Document Q&A System",
+      "subtitle": "RAG based system to chat with documents",
+      "description": "Uses embeddings and vector search to enable natural language conversations over internal document sets.",
+      "tags": [
+        "Python",
+        "RAG",
+        "Vector Search",
+        "LangChain"
+      ],
+      "github": "https://github.com/manthankumarpatel/rag-docs",
+      "featured": false
+    },
+    {
+      "title": "AI Chatbot Platform",
+      "subtitle": "LLM powered chatbot with conversation memory",
+      "description": "Scalable conversional platform capable of retaining context across sessions using advanced prompt engineering.",
+      "tags": [
+        "FastAPI",
+        "LLM",
+        "Memory Retrieval"
+      ],
+      "github": "https://github.com/manthankumarpatel/chatbot-platform",
+      "featured": false
+    }
+  ],
+  "skillCategories": [
+    {
+      "name": "Languages",
+      "skills": [
+        "Python",
+        "JavaScript",
+        "SQL",
+        "Node.js"
+      ]
+    },
+    {
+      "name": "Developer Tools",
+      "skills": [
+        "Git",
+        "GitHub",
+        "GitLab",
+        "Docker",
+        "NGINX",
+        "Postman",
+        "Linux",
+        "Scrapy",
+        "Selenium",
+        "CI/CD Pipelines"
+      ]
+    },
+    {
+      "name": "Frameworks / Libraries",
+      "skills": [
+        "FastAPI",
+        "Express.js",
+        "LangChain",
+        "OpenAI APIs",
+        "Whisper API",
+        "DALL-E",
+        "Google Vision API"
+      ]
+    },
+    {
+      "name": "Cloud / Databases",
+      "skills": [
+        "MySQL",
+        "MongoDB",
+        "Redis",
+        "Azure OpenAI",
+        "Amazon Bedrock",
+        "Linux Servers"
+      ]
+    },
+    {
+      "name": "API & Soft Skills",
+      "skills": [
+        "REST APIs",
+        "OAuth",
+        "Token Auth",
+        "Problem-Solving",
+        "Communication",
+        "Team Collaboration"
+      ]
+    },
+    {
+      "name": "Areas of Interest",
+      "skills": [
+        "AI Integration",
+        "LLM Applications",
+        "Automation",
+        "Agents",
+        "RAG Systems",
+        "OCR Solutions"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "Dharmsinh Desai University",
+      "degree": "B.Tech in Computer Engineering",
+      "year": "2025",
+      "grade": "CGPA: 8.25",
+      "location": "Nadiad, Gujarat"
+    },
+    {
+      "school": "D.N. High School",
+      "degree": "Higher Secondary Certificate (HSC)",
+      "year": "2021",
+      "grade": "94%",
+      "location": "Anand, Gujarat"
+    },
+    {
+      "school": "BAPS Swaminarayan School",
+      "degree": "Secondary School Certificate (SSC)",
+      "year": "2019",
+      "grade": "92.66%",
+      "location": "Anand, Gujarat"
+    }
+  ],
+  "resume": {
+    "url": "https://drive.google.com/file/d/1QLzSwdAVZcEpq1QZIuiswmzZwFzWUfTg/view?usp=sharing",
+    "fileName": "Manthan_Patel_Resume.pdf"
+  },
+  "contactInfo": {
+    "successMessage": "Thank you for reaching out! I'll get back to you soon.",
+    "placeholders": {
+      "name": "Your Name",
+      "email": "your@email.com",
+      "subject": "What's this about?",
+      "message": "Tell me more..."
+    }
+  }
+}
