@@ -75,3 +75,18 @@ Edit:
 - A production API handler is included at `api/gemini.js` (works for serverless platforms that support this pattern).
 - A production API handler is also included at `api/contact.js`.
 - Ensure `GEMINI_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `CONTACT_TO`, `CONTACT_FROM`, `CONTACT_AUTO_REPLY_SUBJECT`, `CONTACT_AUTO_REPLY_NAME` are configured in your hosting environment.
+
+## Free Deploy (Vercel)
+
+1. Push this project to GitHub.
+2. Go to Vercel and import your GitHub repository.
+3. Keep defaults (Framework: `Vite`, Build Command: `npm run build`, Output: `dist`).
+4. Add the same environment variables from `.env` in:
+   - Vercel Project Settings -> Environment Variables
+5. Deploy.
+
+After deploy, test:
+- `https://<your-domain>/api/gemini`
+- `https://<your-domain>/api/contact`
+
+If you update environment variables later, redeploy once.
