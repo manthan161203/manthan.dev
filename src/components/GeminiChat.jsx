@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FiRotateCcw, FiSend, FiX } from 'react-icons/fi';
+import { FiCopy, FiRotateCcw, FiSend, FiX } from 'react-icons/fi';
 import { FaBrain } from 'react-icons/fa';
 import { GEMINI_CONTEXT } from '../data';
 
@@ -26,6 +26,108 @@ const DEFAULT_MESSAGES = [
 const MODEL_STORAGE_KEY = 'portfolio_gemini_model';
 const MAX_INPUT_CHARS = 500;
 
+function renderInlineText(text, keyPrefix = 'inline') {
+    return text
+        .split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
+        .filter(Boolean)
+        .map((token, index) => {
+            if (token.startsWith('**') && token.endsWith('**')) {
+                return (
+                    <strong key={`${keyPrefix}-b-${index}`} className="font-semibold text-[#f8f6f1]">
+                        {token.slice(2, -2)}
+                    </strong>
+                );
+            }
+            if (token.startsWith('`') && token.endsWith('`')) {
+                return (
+                    <code key={`${keyPrefix}-c-${index}`} className="px-1.5 py-0.5 rounded bg-black/35 border border-white/10 text-[#fce3a4]">
+                        {token.slice(1, -1)}
+                    </code>
+                );
+            }
+            return <span key={`${keyPrefix}-t-${index}`}>{token}</span>;
+        });
+}
+
+function renderFormattedMessage(text, keyPrefix = 'msg') {
+    const lines = String(text || '').split('\n');
+    const nodes = [];
+    let bulletItems = [];
+    let numberedItems = [];
+
+    const flushLists = (lineIndex) => {
+        if (bulletItems.length > 0) {
+            nodes.push(
+                <ul key={`${keyPrefix}-ul-${lineIndex}`} className="list-disc pl-5 space-y-1">
+                    {bulletItems.map((item, i) => (
+                        <li key={`${keyPrefix}-ul-item-${lineIndex}-${i}`}>{renderInlineText(item, `${keyPrefix}-ul-inline-${i}`)}</li>
+                    ))}
+                </ul>,
+            );
+            bulletItems = [];
+        }
+        if (numberedItems.length > 0) {
+            nodes.push(
+                <ol key={`${keyPrefix}-ol-${lineIndex}`} className="list-decimal pl-5 space-y-1">
+                    {numberedItems.map((item, i) => (
+                        <li key={`${keyPrefix}-ol-item-${lineIndex}-${i}`}>{renderInlineText(item, `${keyPrefix}-ol-inline-${i}`)}</li>
+                    ))}
+                </ol>,
+            );
+            numberedItems = [];
+        }
+    };
+
+    lines.forEach((rawLine, index) => {
+        const line = rawLine.trim();
+        const bulletMatch = line.match(/^[-*]\s+(.*)$/);
+        if (bulletMatch) {
+            bulletItems.push(bulletMatch[1]);
+            return;
+        }
+
+        const orderedMatch = line.match(/^\d+\.\s+(.*)$/);
+        if (orderedMatch) {
+            numberedItems.push(orderedMatch[1]);
+            return;
+        }
+
+        flushLists(index);
+
+        if (!line) {
+            nodes.push(<div key={`${keyPrefix}-sp-${index}`} className="h-2" />);
+            return;
+        }
+
+        if (line.startsWith('### ')) {
+            nodes.push(
+                <h5 key={`${keyPrefix}-h3-${index}`} className="text-sm font-semibold text-[#f8f6f1]">
+                    {renderInlineText(line.replace(/^###\s+/, ''), `${keyPrefix}-h3-inline-${index}`)}
+                </h5>,
+            );
+            return;
+        }
+
+        if (line.startsWith('## ')) {
+            nodes.push(
+                <h4 key={`${keyPrefix}-h2-${index}`} className="text-base font-semibold text-[#f8f6f1]">
+                    {renderInlineText(line.replace(/^##\s+/, ''), `${keyPrefix}-h2-inline-${index}`)}
+                </h4>,
+            );
+            return;
+        }
+
+        nodes.push(
+            <p key={`${keyPrefix}-p-${index}`} className="leading-relaxed">
+                {renderInlineText(rawLine, `${keyPrefix}-p-inline-${index}`)}
+            </p>,
+        );
+    });
+
+    flushLists(lines.length + 1);
+    return nodes;
+}
+
 export default function GeminiChat() {
     const [open, setOpen] = useState(false);
     const [model, setModel] = useState(MODELS[0].value);
@@ -33,6 +135,8 @@ export default function GeminiChat() {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [needsSetup, setNeedsSetup] = useState(false);
+    const [errorBanner, setErrorBanner] = useState('');
+    const [copiedIndex, setCopiedIndex] = useState(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -121,6 +225,7 @@ export default function GeminiChat() {
                 if (isMissingKey) {
                     setNeedsSetup(true);
                 }
+                setErrorBanner(String(errMsg));
                 setMessages((prev) => [
                     ...prev,
                     {
@@ -146,13 +251,16 @@ export default function GeminiChat() {
             }
 
             setNeedsSetup(false);
+            setErrorBanner('');
             setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
         } catch (error) {
+            const message = `Network error: ${error.message}`;
+            setErrorBanner(message);
             setMessages((prev) => [
                 ...prev,
                 {
                     role: 'assistant',
-                    text: `Network error: ${error.message}`,
+                    text: message,
                     isError: true,
                 },
             ]);
@@ -164,12 +272,25 @@ export default function GeminiChat() {
     const resetConversation = () => {
         setMessages(DEFAULT_MESSAGES);
         setInput('');
+        setNeedsSetup(false);
+        setErrorBanner('');
+        setCopiedIndex(null);
     };
 
     const onInputKeyDown = (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             sendMessage();
+        }
+    };
+
+    const copyMessage = async (text, index) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedIndex(index);
+            setTimeout(() => setCopiedIndex(null), 1400);
+        } catch {
+            // ignore clipboard failures
         }
     };
 
@@ -226,6 +347,11 @@ export default function GeminiChat() {
                                 </p>
                             </div>
                         )}
+                        {errorBanner && !needsSetup && (
+                            <div className="mx-4 mt-3 rounded-xl border border-[#f7d47c66] bg-[#f7d47c12] px-3 py-2 text-[11px] text-[#fce3a4]">
+                                {errorBanner}
+                            </div>
+                        )}
 
                         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3" aria-live="polite">
                             {messages.map((message, index) => (
@@ -233,7 +359,7 @@ export default function GeminiChat() {
                                     key={index}
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                                    className={`group max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                                         message.role === 'user'
                                             ? 'self-end bg-[#f7d47c] text-[#1f1a10] rounded-br-sm'
                                             : message.isError
@@ -241,7 +367,20 @@ export default function GeminiChat() {
                                                 : 'self-start bg-white/10 text-slate-200 border border-white/10 rounded-bl-sm'
                                     }`}
                                 >
-                                    {message.text}
+                                    <div className="space-y-1 break-words">
+                                        {renderFormattedMessage(message.text, `msg-${index}`)}
+                                    </div>
+                                    {message.role === 'assistant' && !message.isError && (
+                                        <button
+                                            type="button"
+                                            onClick={() => copyMessage(message.text, index)}
+                                            className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-[#64f5d2] transition-colors"
+                                            aria-label="Copy assistant message"
+                                        >
+                                            <FiCopy size={12} />
+                                            {copiedIndex === index ? 'Copied' : 'Copy'}
+                                        </button>
+                                    )}
                                 </motion.div>
                             ))}
 

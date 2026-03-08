@@ -6,6 +6,9 @@ const ALLOWED_MODELS = new Set(['gemini-2.5-flash-lite', 'gemini-2.0-flash'])
 const MAX_PART_CHARS = 6000
 const MAX_TOTAL_CHARS = 30000
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
+const RATE_LIMIT_MAX_REQUESTS = 5
+const contactRateLimitStore = new Map()
 
 function isPlaceholderKey(value) {
   return !value || /your[_\s-]?gemini[_\s-]?api[_\s-]?key/i.test(value)
@@ -51,6 +54,11 @@ function validateFormPayload(body) {
   const email = (body?.email || '').trim()
   const subject = (body?.subject || '').trim()
   const message = (body?.message || '').trim()
+  const website = (body?.website || '').trim()
+
+  if (website) {
+    return { error: 'Unable to process this request.' }
+  }
 
   if (!name || name.length < 2 || name.length > 80) {
     return { error: 'Name must be between 2 and 80 characters.' }
@@ -66,6 +74,40 @@ function validateFormPayload(body) {
   }
 
   return { name, email, subject, message }
+}
+
+function getClientIp(req) {
+  const forwarded = req.headers?.['x-forwarded-for']
+  if (typeof forwarded === 'string' && forwarded.trim()) {
+    return forwarded.split(',')[0].trim()
+  }
+  if (Array.isArray(forwarded) && forwarded.length > 0) {
+    return String(forwarded[0] || '').split(',')[0].trim()
+  }
+  return req.socket?.remoteAddress || 'unknown'
+}
+
+function isRateLimited(ip) {
+  const now = Date.now()
+  for (const [key, value] of contactRateLimitStore.entries()) {
+    if (now - value.windowStart > RATE_LIMIT_WINDOW_MS) {
+      contactRateLimitStore.delete(key)
+    }
+  }
+
+  const current = contactRateLimitStore.get(ip)
+  if (!current || now - current.windowStart > RATE_LIMIT_WINDOW_MS) {
+    contactRateLimitStore.set(ip, { windowStart: now, count: 1 })
+    return false
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return true
+  }
+
+  current.count += 1
+  contactRateLimitStore.set(ip, current)
+  return false
 }
 
 function escapeHtml(value) {
@@ -194,6 +236,18 @@ function apiDevProxy(env) {
           res.statusCode = 405
           res.setHeader('Content-Type', 'application/json')
           res.end(JSON.stringify({ error: 'Method not allowed' }))
+          return
+        }
+
+        const clientIp = getClientIp(req)
+        if (isRateLimited(clientIp)) {
+          res.statusCode = 429
+          res.setHeader('Content-Type', 'application/json')
+          res.end(
+            JSON.stringify({
+              error: 'Too many requests. Please try again in a few minutes.',
+            }),
+          )
           return
         }
 

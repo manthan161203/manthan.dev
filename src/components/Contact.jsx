@@ -7,7 +7,7 @@ export default function Contact() {
     const { email, github, linkedin } = portfolioDataJSON.personalInfo;
     const { successMessage, placeholders } = portfolioDataJSON.contactInfo;
 
-    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '', website: '' });
     const [status, setStatus] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +37,7 @@ export default function Contact() {
             }
 
             setStatus('success');
-            setFormData({ name: '', email: '', subject: '', message: '' });
+            setFormData({ name: '', email: '', subject: '', message: '', website: '' });
             setTimeout(() => setStatus(''), 4000);
         } catch {
             setStatus('error');
@@ -65,6 +65,17 @@ export default function Contact() {
                     >
                         <form onSubmit={handleSubmit} className="minimal-card p-6 sm:p-8 flex flex-col gap-5">
                             <h4 className="text-xl font-title font-semibold text-[#f8f6f1] mb-2">Send a Message</h4>
+
+                            <input
+                                type="text"
+                                name="website"
+                                value={formData.website}
+                                onChange={handleChange}
+                                autoComplete="off"
+                                tabIndex="-1"
+                                aria-hidden="true"
+                                className="absolute -left-[9999px] h-0 w-0 opacity-0 pointer-events-none"
+                            />
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <input required type="text" name="name" value={formData.name} onChange={handleChange} placeholder={placeholders.name} className="w-full bg-black/40 border border-white/15 rounded-lg px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-[#64f5d2] transition-colors" />

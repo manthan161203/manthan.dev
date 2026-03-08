@@ -21,6 +21,7 @@ cp .env.example .env
 3. Add server-side keys to `.env`:
 ```env
 GEMINI_API_KEY=your_real_key_here
+# or GOOGLE_API_KEY=your_real_key_here
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
 SMTP_SECURE=true
@@ -37,6 +38,8 @@ CONTACT_AUTO_REPLY_NAME=Manthan Patel
 npm run dev
 ```
 
+If you update `.env` while dev server is running, restart `npm run dev` so API routes pick up new values.
+
 ## Build
 
 ```bash
@@ -48,7 +51,9 @@ npm run preview
 
 - Do **not** put Gemini keys in client env vars like `VITE_*`.
 - The frontend now calls `/api/gemini`; key stays server-side.
+- Server accepts `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or `GOOGLE_GENERATIVE_AI_API_KEY`.
 - The contact form calls `/api/contact`; SMTP credentials stay server-side.
+- Contact API includes honeypot + basic per-IP rate limiting.
 - `.env` is ignored by git. Keep `.env.example` safe as template only.
 
 ## Nodemailer Notes
