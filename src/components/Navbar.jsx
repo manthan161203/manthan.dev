@@ -12,14 +12,42 @@ const navLinks = [
     { label: 'Contact', href: '#contact' },
 ];
 
+const HEADER_OFFSET = 96;
+
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [activeHref, setActiveHref] = useState(navLinks[0].href);
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 50);
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+
+            const threshold = window.scrollY + HEADER_OFFSET + 16;
+            let nextHref = navLinks[0].href;
+
+            navLinks.forEach((link) => {
+                const section = document.getElementById(link.href.slice(1));
+                if (!section) return;
+                if (section.offsetTop <= threshold) {
+                    nextHref = link.href;
+                }
+            });
+
+            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+                nextHref = '#contact';
+            }
+
+            setActiveHref(nextHref);
+        };
+
+        handleScroll();
         window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('resize', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleScroll);
+        };
     }, []);
 
     useEffect(() => {
@@ -50,7 +78,12 @@ export default function Navbar() {
                         <li key={link.label}>
                             <a
                                 href={link.href}
-                                className="text-sm font-medium text-slate-300 hover:text-[#f7d47c] transition-colors"
+                                aria-current={activeHref === link.href ? 'page' : undefined}
+                                className={`text-sm font-medium transition-colors ${
+                                    activeHref === link.href
+                                        ? 'text-[#f7d47c]'
+                                        : 'text-slate-300 hover:text-[#f7d47c]'
+                                }`}
                             >
                                 {link.label}
                             </a>
@@ -92,7 +125,10 @@ export default function Navbar() {
                                 key={link.label}
                                 href={link.href}
                                 onClick={() => setMenuOpen(false)}
-                                className="text-base font-medium text-slate-300 hover:text-[#f7d47c]"
+                                aria-current={activeHref === link.href ? 'page' : undefined}
+                                className={`text-base font-medium ${
+                                    activeHref === link.href ? 'text-[#f7d47c]' : 'text-slate-300 hover:text-[#f7d47c]'
+                                }`}
                             >
                                 {link.label}
                             </a>

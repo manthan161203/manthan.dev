@@ -79,11 +79,10 @@
       "description": "Extracting, validating, and structuring identity document data. Developed preprocessing, OCR extraction, and structured JSON output for seamless backend integration.",
       "tags": [
         "Python",
-        "Tesseract OCR",
+        "EasyOCR",
         "OpenCV",
         "FastAPI"
       ],
-      "github": "https://github.com/manthankumarpatel",
       "featured": true
     },
     {
@@ -96,7 +95,6 @@
         "React.js",
         "Node.js"
       ],
-      "github": "https://github.com/manthankumarpatel",
       "featured": true
     },
     {
@@ -109,7 +107,6 @@
         "Vector Search",
         "LangChain"
       ],
-      "github": "https://github.com/manthankumarpatel/rag-docs",
       "featured": false
     },
     {
@@ -121,7 +118,6 @@
         "LLM",
         "Memory Retrieval"
       ],
-      "github": "https://github.com/manthankumarpatel/chatbot-platform",
       "featured": false
     }
   ],

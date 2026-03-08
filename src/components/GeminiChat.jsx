@@ -385,10 +385,13 @@ export default function GeminiChat() {
                             ))}
 
                             {loading && (
-                                <div className="self-start bg-white/10 border border-white/10 rounded-2xl rounded-bl-sm px-3 py-2 flex gap-1">
-                                    <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" />
-                                    <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:130ms]" />
-                                    <span className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:260ms]" />
+                                <div className="self-start w-[78%] max-w-[300px] bg-white/10 border border-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
+                                    <div className="h-2.5 w-20 rounded bg-white/20 animate-pulse mb-2.5" />
+                                    <div className="space-y-2">
+                                        <div className="h-2.5 w-full rounded bg-white/15 animate-pulse" />
+                                        <div className="h-2.5 w-[88%] rounded bg-white/15 animate-pulse [animation-delay:120ms]" />
+                                        <div className="h-2.5 w-[64%] rounded bg-white/15 animate-pulse [animation-delay:220ms]" />
+                                    </div>
                                 </div>
                             )}
 
