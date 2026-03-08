@@ -21,7 +21,7 @@ export default function Experience() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className={`relative md:flex items-center justify-between w-full mb-16 pl-8 md:pl-0 z-10 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
+                            className={`relative md:flex items-center justify-between w-full mb-12 md:mb-16 pl-8 md:pl-0 z-10 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
                         >
                             {/* Timeline Dot */}
                             <div className="absolute left-0 md:left-1/2 w-4 h-4 rounded-full bg-[#64f5d2] border-4 border-[#0b1120] transform -translate-x-[5.5px] md:-translate-x-1/2 mt-1.5 md:mt-0 z-20" />
@@ -31,10 +31,10 @@ export default function Experience() {
 
                             {/* Content Card */}
                             <div className="w-full md:w-5/12">
-                                <div className="minimal-card p-8">
+                                <div className="minimal-card p-6 sm:p-8">
                                     <div className="flex flex-col gap-1 mb-4">
                                         <span className="text-[#64f5d2] font-mono text-xs uppercase tracking-wider">{exp.duration}</span>
-                                        <h4 className="text-xl font-bold font-title text-[#f8f6f1]">{exp.role}</h4>
+                                        <h4 className="text-lg sm:text-xl font-bold font-title text-[#f8f6f1]">{exp.role}</h4>
                                         <span className="text-slate-300 font-medium">{exp.company}</span>
                                     </div>
 

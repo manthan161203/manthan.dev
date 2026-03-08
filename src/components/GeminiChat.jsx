@@ -32,6 +32,7 @@ export default function GeminiChat() {
     const [messages, setMessages] = useState(DEFAULT_MESSAGES);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [needsSetup, setNeedsSetup] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -112,12 +113,19 @@ export default function GeminiChat() {
             const data = await response.json();
 
             if (!response.ok) {
+                const errCode = data?.code || data?.error?.code;
                 const errMsg = data?.error?.message || data?.error || 'Gemini request failed';
+                const isMissingKey =
+                    errCode === 'MISSING_GEMINI_KEY' ||
+                    /gemini_api_key|google_api_key|api key is missing/i.test(String(errMsg));
+                if (isMissingKey) {
+                    setNeedsSetup(true);
+                }
                 setMessages((prev) => [
                     ...prev,
                     {
                         role: 'assistant',
-                        text: `Error: ${errMsg}. Ensure GEMINI_API_KEY is set on the server.`,
+                        text: `Error: ${errMsg}`,
                         isError: true,
                     },
                 ]);
@@ -137,6 +145,7 @@ export default function GeminiChat() {
                 return;
             }
 
+            setNeedsSetup(false);
             setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
         } catch (error) {
             setMessages((prev) => [
@@ -165,7 +174,7 @@ export default function GeminiChat() {
     };
 
     return (
-        <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end pointer-events-none">
+        <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 flex flex-col items-end pointer-events-none">
             <AnimatePresence>
                 {open && (
                     <motion.section
@@ -173,16 +182,16 @@ export default function GeminiChat() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 16 }}
                         transition={{ duration: 0.2 }}
-                        className="pointer-events-auto w-[380px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[82vh] rounded-3xl border border-white/15 bg-[#0b1120]/95 shadow-2xl shadow-[#64f5d226] overflow-hidden flex flex-col backdrop-blur-xl"
+                        className="pointer-events-auto w-[420px] max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] h-[80vh] sm:h-[560px] max-h-[84vh] rounded-[1.75rem] border border-white/15 bg-[#0b1120]/95 shadow-2xl shadow-[#64f5d226] overflow-hidden flex flex-col backdrop-blur-xl"
                     >
-                        <header className="p-4 border-b border-white/10 bg-white/[0.02] flex items-center justify-between gap-3">
+                        <header className="p-4 border-b border-white/10 bg-[linear-gradient(135deg,rgba(100,245,210,0.10),rgba(247,212,124,0.08)_55%,rgba(255,255,255,0.02))] flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="w-10 h-10 rounded-xl bg-[#64f5d21a] border border-[#64f5d255] text-[#64f5d2] flex items-center justify-center">
                                     <FaBrain />
                                 </span>
                                 <div>
                                     <h3 className="font-title font-semibold text-white text-sm">Portfolio Copilot</h3>
-                                    <p className="text-xs text-slate-400">Server-side Gemini route</p>
+                                    <p className="text-xs text-slate-300">Ask about projects, experience, and fit</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -195,7 +204,7 @@ export default function GeminiChat() {
                                     <FiRotateCcw size={14} />
                                 </button>
                                 <select
-                                    className="text-xs bg-black/30 border border-white/15 rounded-lg px-2 py-1 text-slate-200 outline-none"
+                                    className="text-[11px] bg-black/30 border border-white/15 rounded-lg px-2 py-1 text-slate-200 outline-none max-w-[132px]"
                                     value={model}
                                     onChange={(event) => setModel(event.target.value)}
                                     aria-label="Select Gemini model"
@@ -208,6 +217,15 @@ export default function GeminiChat() {
                                 </select>
                             </div>
                         </header>
+
+                        {needsSetup && (
+                            <div className="mx-4 mt-3 rounded-xl border border-[#f7d47c66] bg-[#f7d47c12] px-3 py-2.5">
+                                <p className="text-[#fce3a4] text-xs font-semibold">Gemini key setup required</p>
+                                <p className="text-[11px] text-slate-300 mt-1">
+                                    Add `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) in `.env`, then restart `npm run dev`.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3" aria-live="polite">
                             {messages.map((message, index) => (
@@ -242,7 +260,7 @@ export default function GeminiChat() {
                                             type="button"
                                             key={prompt}
                                             onClick={() => sendMessage(prompt)}
-                                            className="text-xs text-left px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/[0.08] transition-colors"
+                                            className="text-xs text-left px-3 py-2 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-[#64f5d212] hover:border-[#64f5d244] transition-colors"
                                         >
                                             {prompt}
                                         </button>
@@ -289,7 +307,7 @@ export default function GeminiChat() {
                 onClick={() => setOpen((current) => !current)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="pointer-events-auto w-14 h-14 rounded-full border border-[#f7d47c80] bg-[#f7d47c] text-[#1f1a10] flex items-center justify-center shadow-xl shadow-[#f7d47c38] relative"
+                className="pointer-events-auto w-14 h-14 rounded-full border border-[#f7d47c80] bg-[linear-gradient(135deg,#f7d47c,#f3c95d)] text-[#1f1a10] flex items-center justify-center shadow-xl shadow-[#f7d47c38] relative"
                 aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
             >
                 <AnimatePresence mode="wait">

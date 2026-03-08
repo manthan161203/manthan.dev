@@ -87,7 +87,7 @@ export default function Projects() {
                         No projects match this filter. Try another tag or search text.
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {filteredProjects.map((proj, index) => (
                         <motion.div
                             key={`${proj.title}-${index}`}
@@ -95,7 +95,7 @@ export default function Projects() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="minimal-card p-8 flex flex-col group"
+                            className="minimal-card p-6 sm:p-8 flex flex-col group"
                         >
                             <div className="flex justify-between items-start mb-6 w-full">
                                 <div className="text-sm font-mono text-slate-400 group-hover:text-[#64f5d2] transition-colors">

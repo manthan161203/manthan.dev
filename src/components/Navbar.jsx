@@ -22,6 +22,13 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    useEffect(() => {
+        document.body.style.overflow = menuOpen ? 'hidden' : '';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [menuOpen]);
+
     return (
         <header
             className={`fixed top-0 w-full z-50 transition-all duration-300 ${
@@ -30,7 +37,7 @@ export default function Navbar() {
                     : 'py-5 bg-transparent'
             }`}
         >
-            <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between" aria-label="Primary navigation">
+            <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between" aria-label="Primary navigation">
                 <a
                     href="#home"
                     className="text-xl md:text-2xl font-bold font-title tracking-tight text-[#f8f6f1] hover:text-[#f7d47c] transition-colors"
@@ -78,7 +85,7 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: -12 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -12 }}
-                        className="absolute top-full left-0 w-full md:hidden border-b border-white/10 bg-[#0b1120]/95 backdrop-blur-xl flex flex-col items-center py-6 gap-6"
+                        className="absolute top-full left-0 w-full md:hidden border-b border-white/10 bg-[#0b1120]/95 backdrop-blur-xl flex flex-col items-center py-6 gap-6 max-h-[calc(100vh-88px)] overflow-y-auto"
                     >
                         {navLinks.map((link) => (
                             <a

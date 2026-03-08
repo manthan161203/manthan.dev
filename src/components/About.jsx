@@ -17,10 +17,10 @@ export default function About() {
                     transition={{ duration: 0.6 }}
                     className="max-w-3xl mx-auto"
                 >
-                    <div className="flex flex-col md:flex-row gap-12 items-start">
+                    <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
                         {/* Profile Image Column */}
                         <div className="w-full md:w-1/3 flex flex-col items-center md:items-start shrink-0">
-                            <div className="w-48 h-48 rounded-2xl border border-white/15 flex items-center justify-center mb-6 overflow-hidden minimal-card p-1">
+                            <div className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl border border-white/15 flex items-center justify-center mb-6 overflow-hidden minimal-card p-1">
                                 <img
                                     src="/profile_pic.jpg"
                                     alt={`${name} profile`}
@@ -43,11 +43,11 @@ export default function About() {
                         {/* Text Content */}
                         <div className="w-full md:w-2/3">
                             <h2 className="text-sm font-mono text-slate-500 uppercase tracking-[0.2em] mb-4">About Me</h2>
-                            <h3 className="text-3xl font-bold font-title text-[#f8f6f1] mb-6 leading-snug">
+                            <h3 className="text-2xl sm:text-3xl font-bold font-title text-[#f8f6f1] mb-6 leading-snug">
                                 Engineering intelligence<br />at scale.
                             </h3>
 
-                            <div className="space-y-6 text-slate-300 leading-relaxed text-lg">
+                            <div className="space-y-6 text-slate-300 leading-relaxed text-base sm:text-lg">
                                 <p>{bio}</p>
                             </div>
 

@@ -7,6 +7,22 @@ const MAX_PART_CHARS = 6000
 const MAX_TOTAL_CHARS = 30000
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+function isPlaceholderKey(value) {
+  return !value || /your[_\s-]?gemini[_\s-]?api[_\s-]?key/i.test(value)
+}
+
+function resolveGeminiApiKey(env) {
+  const candidates = [
+    env.GEMINI_API_KEY,
+    env.GOOGLE_API_KEY,
+    env.GOOGLE_GENERATIVE_AI_API_KEY,
+  ]
+  const key = candidates.find(
+    (item) => typeof item === 'string' && item.trim() && !isPlaceholderKey(item),
+  )
+  return key?.trim() || ''
+}
+
 function validateContents(contents) {
   if (!Array.isArray(contents) || contents.length === 0) {
     return 'Invalid request body: `contents` is required.'
@@ -96,6 +112,12 @@ function apiDevProxy(env) {
   return {
     name: 'portfolio-api-dev-proxy',
     configureServer(server) {
+      const getRuntimeEnv = () => ({
+        ...env,
+        ...loadEnv(server.config.mode, process.cwd(), ''),
+        ...process.env,
+      })
+
       server.middlewares.use('/api/gemini', async (req, res) => {
         if (req.method !== 'POST') {
           res.statusCode = 405
@@ -104,12 +126,16 @@ function apiDevProxy(env) {
           return
         }
 
-        if (!env.GEMINI_API_KEY || env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+        const runtimeEnv = getRuntimeEnv()
+        const geminiApiKey = resolveGeminiApiKey(runtimeEnv)
+        if (!geminiApiKey) {
           res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')
           res.end(
             JSON.stringify({
-              error: 'GEMINI_API_KEY is missing. Add it to .env for server-side calls.',
+              code: 'MISSING_GEMINI_KEY',
+              error:
+                'Gemini API key is missing. Add GEMINI_API_KEY (or GOOGLE_API_KEY) to .env.',
             }),
           )
           return
@@ -134,7 +160,7 @@ function apiDevProxy(env) {
           }
 
           const apiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${env.GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${geminiApiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -172,6 +198,7 @@ function apiDevProxy(env) {
         }
 
         try {
+          const runtimeEnv = getRuntimeEnv()
           const form = validateFormPayload(await parseJsonBody(req))
           if ('error' in form) {
             res.statusCode = 400
@@ -180,7 +207,7 @@ function apiDevProxy(env) {
             return
           }
 
-          const transportConfig = getTransportConfig(env)
+          const transportConfig = getTransportConfig(runtimeEnv)
           if (!transportConfig) {
             res.statusCode = 500
             res.setHeader('Content-Type', 'application/json')
@@ -193,13 +220,13 @@ function apiDevProxy(env) {
             return
           }
 
-          const to = env.CONTACT_TO || env.SMTP_USER
-          const from = env.CONTACT_FROM || env.SMTP_USER
+          const to = runtimeEnv.CONTACT_TO || runtimeEnv.SMTP_USER
+          const from = runtimeEnv.CONTACT_FROM || runtimeEnv.SMTP_USER
           const autoReplySubject =
-            env.CONTACT_AUTO_REPLY_SUBJECT ||
+            runtimeEnv.CONTACT_AUTO_REPLY_SUBJECT ||
             'Thanks for contacting Manthan Patel'
           const autoReplyName =
-            env.CONTACT_AUTO_REPLY_NAME || 'Manthan Patel'
+            runtimeEnv.CONTACT_AUTO_REPLY_NAME || 'Manthan Patel'
           const transporter = nodemailer.createTransport(transportConfig)
 
           const safeName = escapeHtml(form.name)

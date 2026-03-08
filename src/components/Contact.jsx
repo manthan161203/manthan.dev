@@ -55,7 +55,7 @@ export default function Contact() {
                     <h3 className="section-heading">Let's Work Together</h3>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16">
                     {/* Left: Form */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -63,7 +63,7 @@ export default function Contact() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <form onSubmit={handleSubmit} className="minimal-card p-8 flex flex-col gap-5">
+                        <form onSubmit={handleSubmit} className="minimal-card p-6 sm:p-8 flex flex-col gap-5">
                             <h4 className="text-xl font-title font-semibold text-[#f8f6f1] mb-2">Send a Message</h4>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -94,9 +94,9 @@ export default function Contact() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="flex flex-col justify-center gap-8"
+                        className="flex flex-col justify-center gap-6 sm:gap-8"
                     >
-                        <p className="text-slate-300 leading-relaxed text-lg">
+                        <p className="text-slate-300 leading-relaxed text-base sm:text-lg">
                             I'm currently open to new opportunities, collaborations, and conversations about AI and backend engineering.
                         </p>
 
@@ -107,7 +107,7 @@ export default function Contact() {
                                 </div>
                                 <div>
                                     <div className="text-sm text-slate-500 font-medium">Email</div>
-                                    <div className="text-slate-200 group-hover:text-[#64f5d2] transition-colors">{email}</div>
+                                    <div className="text-slate-200 group-hover:text-[#64f5d2] transition-colors break-all">{email}</div>
                                 </div>
                             </a>
 

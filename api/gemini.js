@@ -2,6 +2,20 @@ const ALLOWED_MODELS = new Set(['gemini-2.5-flash-lite', 'gemini-2.0-flash']);
 const MAX_PART_CHARS = 6000;
 const MAX_TOTAL_CHARS = 30000;
 
+function isPlaceholderKey(value) {
+  return !value || /your[_\s-]?gemini[_\s-]?api[_\s-]?key/i.test(value);
+}
+
+function resolveGeminiApiKey(env) {
+  const candidates = [
+    env.GEMINI_API_KEY,
+    env.GOOGLE_API_KEY,
+    env.GOOGLE_GENERATIVE_AI_API_KEY,
+  ];
+  const key = candidates.find((item) => typeof item === 'string' && item.trim() && !isPlaceholderKey(item));
+  return key?.trim() || '';
+}
+
 function validateContents(contents) {
   if (!Array.isArray(contents) || contents.length === 0) {
     return 'Invalid body: `contents` is required.';
@@ -31,10 +45,12 @@ export default async function handler(req, res) {
     return;
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+  const apiKey = resolveGeminiApiKey(process.env);
+  if (!apiKey) {
     res.status(500).json({
-      error: 'GEMINI_API_KEY is missing on the server.',
+      code: 'MISSING_GEMINI_KEY',
+      error:
+        'Gemini API key is missing on the server. Set GEMINI_API_KEY (or GOOGLE_API_KEY) in environment variables.',
     });
     return;
   }

@@ -18,7 +18,7 @@ export default function Skills() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: index * 0.1 }}
-                            className="group minimal-card relative flex flex-col md:flex-row items-center justify-between gap-8 p-8 md:p-10 overflow-hidden"
+                            className="group minimal-card relative flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 p-6 sm:p-8 md:p-10 overflow-hidden"
                         >
                             {/* Abstract Ambient Glow */}
                             <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-[#64f5d21a] rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -35,7 +35,7 @@ export default function Skills() {
                                 {category.skills.map((skill, i) => (
                                     <span
                                         key={i}
-                                        className="px-5 py-2.5 bg-[#f7d47c12] border border-[#f7d47c2e] rounded-lg text-sm font-medium text-[#fce3a4]
+                                        className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#f7d47c12] border border-[#f7d47c2e] rounded-lg text-xs sm:text-sm font-medium text-[#fce3a4]
                                                    shadow-[0_4px_20px_rgba(0,0,0,0.1)] backdrop-blur-sm
                                                    hover:-translate-y-1 hover:bg-[#f7d47c20] hover:border-[#f7d47c55] hover:text-[#fff5dc] transition-all duration-300 cursor-default"
                                     >

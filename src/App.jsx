@@ -20,8 +20,8 @@ export default function App() {
       </a>
       <ScrollProgress />
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-28 -left-20 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,_rgba(15,188,154,0.22)_0%,_rgba(15,188,154,0)_72%)] blur-2xl" />
-        <div className="absolute -bottom-32 -right-24 h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,_rgba(247,212,124,0.18)_0%,_rgba(247,212,124,0)_70%)] blur-2xl" />
+        <div className="absolute -top-20 -left-24 h-[20rem] w-[20rem] sm:h-[24rem] sm:w-[24rem] md:h-[28rem] md:w-[28rem] rounded-full bg-[radial-gradient(circle,_rgba(15,188,154,0.22)_0%,_rgba(15,188,154,0)_72%)] blur-2xl" />
+        <div className="absolute -bottom-24 -right-24 h-[22rem] w-[22rem] sm:h-[26rem] sm:w-[26rem] md:h-[30rem] md:w-[30rem] rounded-full bg-[radial-gradient(circle,_rgba(247,212,124,0.18)_0%,_rgba(247,212,124,0)_70%)] blur-2xl" />
       </div>
       <Navbar />
       <main id="main-content" tabIndex="-1">
