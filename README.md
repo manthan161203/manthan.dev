@@ -1,37 +1,57 @@
-# Manthan Portfolio (React + Vite + Serverless APIs)
+# Manthan Portfolio
 
-Modern AI/ML portfolio with:
-- React + Tailwind + Framer Motion frontend
-- Data-driven content from `src/portfolio.json`
-- Gemini portfolio assistant via server-side API (`/api/gemini`)
-- Contact form email delivery via Nodemailer (`/api/contact`)
+Production-ready personal portfolio built with React + Vite, with two server-side API routes:
+- `/api/gemini`: Gemini proxy to keep API keys off the client
+- `/api/contact`: SMTP-powered contact form with validation, honeypot, and rate limiting
 
 ## Tech Stack
 
-- Frontend: React 19, Vite, Tailwind CSS, Framer Motion
-- Backend (serverless): Node.js API handlers in `api/`
-- AI: Google Gemini (`@google/generative-ai`)
-- Email: Nodemailer (SMTP)
-- Deploy: Vercel (free Hobby plan compatible)
+- React 19
+- Vite 7
+- Tailwind CSS
+- Framer Motion
+- Nodemailer
+- Vercel Serverless Functions
+
+## Features
+
+- Data-driven profile content from `src/portfolio.json`
+- Animated single-page portfolio sections
+- AI assistant section powered by Gemini
+- Contact form that sends:
+  - notification email to you
+  - auto-reply email to the visitor
+- Basic abuse protections:
+  - per-IP rate limit (5 requests per 15 minutes for contact route)
+  - honeypot field (`website`)
+  - payload length and model allowlist checks for Gemini route
 
 ## Project Structure
 
 ```text
 .
 ├── api/
-│   ├── gemini.js          # Gemini proxy (server-side key)
-│   └── contact.js         # Contact email handler
-├── public/                # static assets
+│   ├── gemini.js
+│   └── contact.js
+├── public/
 ├── src/
-│   ├── components/        # UI sections/components
-│   ├── portfolio.json     # portfolio content
-│   └── data.js            # derived data/context
-├── .env.example           # environment template
-├── vercel.json            # Vercel framework config
-└── vite.config.js         # Vite + dev API middleware
+│   ├── components/
+│   ├── portfolio.json
+│   ├── data.js
+│   └── App.jsx
+├── .env.example
+├── PORTFOLIO_DATA_GUIDE.md
+├── QUICK_UPDATE_REFERENCE.js
+├── vite.config.js
+└── vercel.json
 ```
 
-## Local Setup
+## Prerequisites
+
+- Node.js 18+ (recommended: Node.js 20 LTS)
+- npm
+
+## Local Development
 
 1. Install dependencies:
 
@@ -39,18 +59,19 @@ Modern AI/ML portfolio with:
 npm install
 ```
 
-2. Create env file:
+2. Create your local env file:
 
 ```bash
 cp .env.example .env
 ```
 
-3. Fill `.env` (server-side values):
+3. Fill required variables in `.env`:
 
 ```env
-GEMINI_API_KEY=your_real_key_here
-# or GOOGLE_API_KEY=your_real_key_here
-# or GOOGLE_GENERATIVE_AI_API_KEY=your_real_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+# Alternatives also supported by backend:
+# GOOGLE_API_KEY=your_gemini_api_key_here
+# GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key_here
 
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
@@ -64,95 +85,103 @@ CONTACT_AUTO_REPLY_SUBJECT=Thanks for contacting Manthan Patel
 CONTACT_AUTO_REPLY_NAME=Manthan Patel
 ```
 
-4. Run development server:
+4. Start dev server:
 
 ```bash
 npm run dev
 ```
 
-If `.env` changes, restart `npm run dev`.
+If you change `.env`, restart the dev server.
 
 ## Scripts
 
 ```bash
 npm run dev      # start local dev server
-npm run lint     # run eslint
-npm run build    # production build
-npm run preview  # preview production build locally
+npm run build    # create production build
+npm run preview  # preview production build
+npm run lint     # run ESLint
 ```
 
-## API Endpoints
+## API Contracts
 
 ### `POST /api/gemini`
 
-Purpose: server-side Gemini request proxy (keeps API key private).
+Proxy for Gemini `generateContent`.
 
-Body shape (simplified):
+Request body:
 
 ```json
 {
   "model": "gemini-2.5-flash-lite",
-  "contents": [{ "role": "user", "parts": [{ "text": "..." }] }]
+  "contents": [{ "role": "user", "parts": [{ "text": "Hello" }] }]
 }
 ```
 
+Valid models:
+- `gemini-2.5-flash-lite`
+- `gemini-2.0-flash`
+
+Validation rules:
+- `contents` is required
+- max 6000 chars per `parts[].text`
+- max 30000 chars total across request text
+
 ### `POST /api/contact`
 
-Purpose: send inquiry email + auto-reply.
+Sends contact email + auto-reply.
 
-Body:
+Request body:
 
 ```json
 {
   "name": "Visitor Name",
-  "email": "visitor@email.com",
-  "subject": "Hello",
-  "message": "Your message",
+  "email": "visitor@example.com",
+  "subject": "Project discussion",
+  "message": "Hi, I would like to connect...",
   "website": ""
 }
 ```
 
-Notes:
-- `website` is a hidden honeypot field (must stay empty).
-- Basic per-IP rate limiting is enabled.
+Validation rules:
+- `name`: 2-80 chars
+- `email`: valid email format
+- `subject`: max 140 chars (optional)
+- `message`: 10-4000 chars
+- `website`: must be empty (honeypot)
 
-## Free Deployment (Vercel)
+Rate limit:
+- 5 requests per IP per 15 minutes
 
-1. Push this repo to GitHub.
-2. Import repo in Vercel.
-3. Keep defaults:
-   - Framework: `Vite`
-   - Build command: `npm run build`
-   - Output directory: `dist`
-4. Add environment variables from `.env` in Vercel project settings.
+## Deployment (Vercel)
+
+1. Push repository to GitHub.
+2. Import project in Vercel.
+3. Framework preset: `Vite`.
+4. Add all environment variables from `.env`.
 5. Deploy.
 
-After deploy, verify:
+After deployment, verify:
 - `https://<your-domain>/api/gemini`
 - `https://<your-domain>/api/contact`
 
-If env vars are changed later, redeploy once.
+## Content Editing
 
-## Content Updates
-
-Most portfolio text can be updated in:
-- `src/portfolio.json`
-
-Main UI changes:
-- `src/components/*`
+- Update portfolio content: `src/portfolio.json`
+- UI components: `src/components/*`
+- Data guide: `PORTFOLIO_DATA_GUIDE.md`
+- Quick edits helper: `QUICK_UPDATE_REFERENCE.js`
 
 ## Security Notes
 
-- Never expose Gemini or SMTP credentials in client-side `VITE_*` variables.
-- `.env` is already ignored by git.
-- Use Gmail App Password for SMTP (not your main Gmail password).
-- Gmail/SMTP providers may enforce sender identity rules; visitor email is reliably available via `replyTo`.
+- Do not put secrets in client-exposed `VITE_*` vars.
+- Use app passwords for SMTP providers (for Gmail: App Password, not account password).
+- Keep `.env` private and out of version control.
 
 ## Troubleshooting
 
-- `MISSING_GEMINI_KEY`:
-  Set `GEMINI_API_KEY` (or supported alternatives) and redeploy/restart.
-- `SMTP configuration is missing`:
-  Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`.
-- Contact form `429`:
-  Too many submissions in a short window; wait and retry.
+- `MISSING_GEMINI_KEY`
+  - Set `GEMINI_API_KEY` (or one alternative env key) and restart/redeploy.
+- `SMTP configuration is missing`
+  - Ensure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` are present.
+- Contact API returns `429`
+  - Rate limit triggered. Retry after the 15-minute window.
